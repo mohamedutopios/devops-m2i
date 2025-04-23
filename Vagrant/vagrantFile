@@ -1,0 +1,65 @@
+Vagrant.configure("2") do |config|
+
+
+  config.vm.define "ubuntu" do |ubuntu|
+    ubuntu.vm.box = "ubuntu/jammy64"
+    ubuntu.vm.hostname = "ubuntu-dev-vm"
+    ubuntu.vm.network "private_network", ip: "192.168.56.10"
+    ubuntu.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+
+    ubuntu.vm.provider "virtualbox" do |vb|
+      vb.name = "Ubuntu_Dev_VM"
+      vb.memory = 4096
+      vb.cpus = 4
+      vb.gui = false
+    end
+  end
+
+
+  config.vm.define "centos" do |centos|
+    centos.vm.box = "centos/7"
+    centos.vm.hostname = "centos-dev-vm"   
+    centos.vm.network "private_network", ip: "192.168.56.11"
+
+    centos.vm.synced_folder ".", "/vagrant", disabled: true
+
+    centos.vm.provider "virtualbox" do |vb|
+      vb.name = "CentOS_Dev_VM"
+      vb.memory = 2048
+      vb.cpus = 2
+      vb.gui = false
+    end
+
+    
+    centos.vm.provision "shell", inline: <<-SHELL
+      echo "[main]" > /etc/NetworkManager/conf.d/dns-override.conf
+      echo "dns=none" >> /etc/NetworkManager/conf.d/dns-override.conf
+
+      echo "DEVICE=eth1" > /etc/sysconfig/network-scripts/ifcfg-eth1
+      echo "BOOTPROTO=static" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+      echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+      echo "IPADDR=192.168.56.11" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+      echo "NETMASK=255.255.255.0" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+      echo "DNS1=8.8.8.8" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+
+      systemctl restart NetworkManager
+      chattr -i /etc/resolv.conf || true
+      echo "nameserver 8.8.8.8" > /etc/resolv.conf
+      chattr +i /etc/resolv.conf
+
+    
+      sed -i.bak 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Base.repo
+      sed -i 's|^#baseurl=.*|baseurl=http://vault.centos.org/7.9.2009/os/x86_64/|g' /etc/yum.repos.d/CentOS-Base.repo
+
+      sed -i.bak 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Updates.repo || true
+      sed -i 's|^#baseurl=.*|baseurl=http://vault.centos.org/7.9.2009/updates/x86_64/|g' /etc/yum.repos.d/CentOS-Updates.repo || true
+
+      sed -i.bak 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Extras.repo || true
+      sed -i 's|^#baseurl=.*|baseurl=http://vault.centos.org/7.9.2009/extras/x86_64/|g' /etc/yum.repos.d/CentOS-Extras.repo || true
+
+      yum clean all
+      yum makecache fast
+    SHELL
+  end
+
+end
