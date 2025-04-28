@@ -1,0 +1,10 @@
+[Unit]
+description=Regle Firewall
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/local/script_firewall.sh
+
+[Install]
+WantedBy=secure-mode.target
