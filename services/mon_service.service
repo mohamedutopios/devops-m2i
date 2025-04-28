@@ -1,0 +1,9 @@
+[Unit]
+Description=Our first service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/mon_service.sh
+#Restart=always
+[Install]
+WantedBy=multi-user.target
