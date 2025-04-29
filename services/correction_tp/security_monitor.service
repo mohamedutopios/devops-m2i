@@ -1,0 +1,10 @@
+[Unit]
+Description=Surveillance des processus actifs sur tty6
+After=disconnect_users.service
+[Service]
+Type=simple
+ExecStart=/usr/bin/top
+StandardOutput=tty
+TTYPath=/dev/tty6
+[Install]
+WantedBy=secure-mode.target

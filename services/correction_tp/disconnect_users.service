@@ -7,4 +7,4 @@ Type=oneshot
 ExecStart=/usr/bin/local/disconnect_users.sh
 
 [Install]
-WantedBy=secure-mode.target
+WantedBy=secure-mode.targetclear

@@ -1,0 +1,12 @@
+[Unit]
+
+Description=Mode Sécurisé - Activation des services de sécurité
+
+Requires=firewall_reinforce.service disconnect_users.service security_monitor.service
+
+After=basic.target
+
+[Install]
+
+WantedBy=multi-user.target
+ 
